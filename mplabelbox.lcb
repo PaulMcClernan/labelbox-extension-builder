@@ -1,0 +1,210 @@
+widget community.livecode.madpink.labelbox
+
+--required metadata
+metadata title is "MPLabelBox"
+metadata author is "MadPink"
+metadata version is "0.0.0"
+metadata preferredSize 	is "242,130"
+metadata svgicon is "M1664 512Q1664 432 1608 376 1552 320 1472 320L1408 320 1408 704 1472 704Q1552 704 1608 648 1664 592 1664 512ZM0 1280L1792 1280Q1792 1386 1717 1461 1642 1536 1536 1536L256 1536Q150 1536 75 1461 0 1386 0 1280ZM1856 512Q1856 671 1743.5 783.5 1631 896 1472 896L1408 896 1408 928Q1408 1020 1342 1086 1276 1152 1184 1152L480 1152Q388 1152 322 1086 256 1020 256 928L256 192Q256 166 275 147 294 128 320 128L1472 128Q1631 128 1743.5 240.5 1856 353 1856 512Z"
+
+--use dependencies
+use com.livecode.math
+use com.livecode.canvas
+use com.livecode.widget
+use com.livecode.engine
+use com.livecode.foreign
+use com.livecode.mathfoundation
+use com.livecode.library.widgetutils
+
+--list customizable properties
+property someText 	   get mText           set setText
+metadata someText.editor      is "com.livecode.pi.text"
+metadata someText.default     is "A common mistake that people make when trying to design something completely foolproof is to underestimate the ingenuity of complete fools.\n\n-Douglas Adams"
+metadata someText.section 		is "Basic"
+private variable mText as String
+
+
+--metadata for built-in properties:
+metadata foregroundColor.editor		is "com.livecode.pi.color"
+metadata foregroundColor.default is "255,255,255"
+metadata foregroundColor.section is "Colors"
+metadata foregroundColor.label is "Text Color"
+
+metadata backgroundColor.editor		is "com.livecode.pi.color"
+metadata backgroundColor.default is "255,15,192"
+metadata backgroundColor.section is "Colors"
+metadata backgroundColor.label is "Button Color"
+
+metadata hiliteColor.editor		is "com.livecode.pi.color"
+metadata hiliteColor.default is "0,0,0"
+metadata hiliteColor.section is "Colors"
+metadata hiliteColor.label is "Selected button color"
+
+property boxBorder    get mBorder      set setBorder
+metadata boxBorder.editor      is "com.livecode.pi.number"
+metadata boxBorder.default     is "10"
+private variable mBorder as Number
+
+property boxRaidus    get mRadius      set setRadius
+metadata boxRaidus.editor      is "com.livecode.pi.number"
+metadata boxRaidus.default     is "13"
+private variable mRadius as Number
+
+property textFont get mFont set setTextFont
+metadata textFont.editor is "com.livecode.pi.font"
+metadata textFont.default     is "Helvetica"
+private variable mFont as String
+
+
+property textAlign get mAlign	 set setAlign
+metadata textAlign.editor is "com.livecode.pi.enum"
+metadata textAlign.options is "top left,top center,top right,center left,center center,center right,bottom left,bottom center,bottom right,"
+metadata textAlign.default is "center center"
+metadata textAlign.section is "Text"
+private variable mAlign as String
+
+--declare variables:
+private variable mPaint as Paint
+private variable mTextPaint as Paint
+
+
+----constant:
+constant kBuffer is 10
+
+----NEEDED handler, saves the properties of the sidget when stack is saved
+public handler OnSave(out rProperties as Array)
+	put the empty array into rProperties
+	put mText into rProperties["someText"]
+	put mBorder into rProperties["boxBorder"]
+	put mAlign into rProperties["textAlign"]
+end handler
+
+----NEEDED handler, loads the saved properties
+public handler OnLoad(in pProperties as Array)
+	put pProperties["someText"] into mText
+	put pProperties["boxBorder"] into mBorder
+	put pProperties["textAlign"] into mAlign
+end handler
+
+--HANDLERS to set properties
+private handler setText(in pText as String)
+	put pText into mText
+	redraw all
+end handler
+
+private handler setRadius(in pNum as Number)
+	put pNum into mRadius
+	redraw all
+end handler
+
+private handler setAlign(in pText as String)
+	put pText into mAlign
+	redraw all
+end handler
+
+private handler setBorder(in pNum as Number)
+	put pNum into mBorder
+	redraw all
+end handler
+
+private handler setTextFont(in pText as String)
+	put pText into mFont
+	redraw all
+end handler
+
+--CREATE AND DRAW WIDGET:
+--OnCreate  This is called when the widget is first created:
+public handler OnCreate()
+
+end handler
+
+--OnPaint   This is called on redraw
+public handler OnPaint()
+	mpDrawBase(my foreground paint,my background paint,mBorder,mRadius)
+	set the paint of this canvas to my foreground paint
+	mpWrapTextinRect(rectangle [mBorder*2,mBorder*2,my width-mBorder*2,my height-mBorder*2],mText,mAlign)
+end handler
+
+private handler mpDrawBase(in pFore as Paint, in pBack as Paint, in pBorder as Number, in pRadius as Number)
+	variable tRect as Rectangle
+	set the paint of this canvas to pBack
+	put rectangle [0,0,my width,my height] into tRect
+	fill rounded rectangle path of tRect with radius pRadius on this canvas
+	set the paint of this canvas to pFore
+	put rectangle [3,3,my width-3,my height-3] into tRect
+	fill rounded rectangle path of tRect with radius pRadius on this canvas
+	set the paint of this canvas to pBack
+	put rectangle [mBorder,mBorder,my width-mBorder,my height-mBorder] into tRect
+	fill rounded rectangle path of tRect with radius pRadius on this canvas
+end handler
+
+private handler mpWrapTextinRect(in pTextBox as Rectangle,in pText as String,in pAlign as String)
+  variable tTextW as Number
+  variable tTextH as Number
+  variable tMaxRows as Number
+  variable tWords as List
+  variable tWord as String
+  variable tLine as String
+  variable tTestLine as String
+  variable tRow as Number
+  variable tAlign as List
+  variable tLinesofText as List
+
+  split pAlign by " " into tAlign
+  replace newline with " qzqz " in pText
+  split pText by " " into tWords
+  put the height of the layout bounds of text pText on this canvas into tTextH
+  put the width of pTextBox into tTextW
+  put the floor of ((the height of pTextBox)/tTextH) into tMaxRows
+  if tMaxRows = 0 then
+	  return
+  end if
+  put 1 into tRow
+
+  repeat for each element tWord in tWords
+	  put tLine & tWord into tTestLine
+	  if the width of the layout bounds of text tTestLine on this canvas > tTextW or tWord is "qzqz" then
+		  push tLine onto back of tLinesofText
+		  put "" into tTestLine
+		  if tRow=tMaxRows then
+			  put "" into tLine
+			  exit repeat
+		  end if
+		  add 1 to tRow
+		  if tWord is "qzqz" then
+			  put "" into tLine
+		  else
+			  put tWord & " " into tLine
+		  end if
+	  else
+		  put tTestLine & " " into tLine
+	  end if
+   end repeat
+	push tLine onto back of tLinesofText
+
+	if element 1 of tAlign is "center" then
+		add ((the height of pTextBox)-(tMaxRows*tTextH) + (tMaxRows-tRow)*tTextH)/2 to the top of pTextBox
+	else if element 1 of tAlign is "bottom" then
+		add ((the height of pTextBox)-(tMaxRows*tTextH) + (tMaxRows-tRow)*tTextH) to the top of pTextBox
+	end if
+
+	put 1 into tRow
+	repeat for each element tLine in tLinesofText
+		set the height of pTextBox to tTextH
+  		if element 2 of tAlign is "center" then
+	  		fill text tLine at center of pTextBox on this canvas
+  		else if element 2 of tAlign is "right" then
+	  		fill text tLine at top right of pTextBox on this canvas
+  		else
+	  		fill text tLine at top left of pTextBox on this canvas
+  		end if
+		add 1 to tRow
+		add tTextH to the top of pTextBox
+	end repeat
+end handler
+
+public handler OnMouseUp()
+   post "mouseUp"
+end handler
+
+end widget
