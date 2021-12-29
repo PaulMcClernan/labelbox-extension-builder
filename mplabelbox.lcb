@@ -47,14 +47,20 @@ private variable mBorder as Number
 
 property boxRaidus    get mRadius      set setRadius
 metadata boxRaidus.editor      is "com.livecode.pi.number"
-metadata boxRaidus.default     is "13"
+metadata boxRaidus.default     is "15"
 private variable mRadius as Number
 
-property textFont get mFont set setTextFont
-metadata textFont.editor is "com.livecode.pi.font"
-metadata textFont.default     is "Helvetica"
+property labelTextFont get mFont set setTextFont --- some default properties can't be shodowed correctly it seems so I renamed textFont to labelTextFont
+metadata labelTextFont.editor is "com.livecode.pi.font"
+metadata labelTextFont.default     is "Helvetica"
+metadata labelTextFont.section is "Text"
 private variable mFont as String
 
+property labelTextSize get mFontSize set setTextFontSize --- some default properties can't be shodowed correctly it seems so I renamed textSize to labelTextSize
+metadata labelTextSize.editor is "com.livecode.pi.number"
+metadata labelTextSize.default     is "12"
+metadata labelTextSize.section is "Text"
+private variable mFontSize as Number
 
 property textAlign get mAlign	 set setAlign
 metadata textAlign.editor is "com.livecode.pi.enum"
@@ -66,7 +72,6 @@ private variable mAlign as String
 --declare variables:
 private variable mPaint as Paint
 private variable mTextPaint as Paint
-
 
 ----constant:
 constant kBuffer is 10
@@ -112,6 +117,12 @@ private handler setTextFont(in pText as String)
 	redraw all
 end handler
 
+private handler setTextFontSize(in pNum as Number)
+	put pNum into mFontSize
+	redraw all
+end handler
+
+
 --CREATE AND DRAW WIDGET:
 --OnCreate  This is called when the widget is first created:
 public handler OnCreate()
@@ -122,6 +133,7 @@ end handler
 public handler OnPaint()
 	mpDrawBase(my foreground paint,my background paint,mBorder,mRadius)
 	set the paint of this canvas to my foreground paint
+	set the font of this canvas to font mFont at size mFontSize
 	mpWrapTextinRect(rectangle [mBorder*2,mBorder*2,my width-mBorder*2,my height-mBorder*2],mText,mAlign)
 end handler
 
