@@ -1,2 +1,2 @@
-# labelbox-livecode-builder
+# labelbox-extension-builder
 A customizable label box 
