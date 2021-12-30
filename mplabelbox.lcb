@@ -1,9 +1,9 @@
-widget community.livecode.madpink.labelbox
+widget org.openxtalk.madpink.labelbox
 
 --required metadata
-metadata title is "MPLabelBox"
-metadata author is "MadPink"
-metadata version is "0.0.0"
+metadata title is "LabelBox"
+metadata author is "MadPink, Paul McClernan"
+metadata version is "0.0.1"
 metadata preferredSize 	is "242,130"
 metadata svgicon is "M1664 512Q1664 432 1608 376 1552 320 1472 320L1408 320 1408 704 1472 704Q1552 704 1608 648 1664 592 1664 512ZM0 1280L1792 1280Q1792 1386 1717 1461 1642 1536 1536 1536L256 1536Q150 1536 75 1461 0 1386 0 1280ZM1856 512Q1856 671 1743.5 783.5 1631 896 1472 896L1408 896 1408 928Q1408 1020 1342 1086 1276 1152 1184 1152L480 1152Q388 1152 322 1086 256 1020 256 928L256 192Q256 166 275 147 294 128 320 128L1472 128Q1631 128 1743.5 240.5 1856 353 1856 512Z"
 
@@ -50,16 +50,14 @@ metadata boxRaidus.editor      is "com.livecode.pi.number"
 metadata boxRaidus.default     is "15"
 private variable mRadius as Number
 
-property labelTextFont get mFont set setTextFont --- some default properties can't be shodowed correctly it seems so I renamed textFont to labelTextFont
-metadata labelTextFont.editor is "com.livecode.pi.font"
-metadata labelTextFont.default     is "Helvetica"
-metadata labelTextFont.section is "Text"
+property textFont get mFont set setTextFont
+metadata textFont.editor is "com.livecode.pi.font"
+metadata textFont.default     is "Helvetica"
 private variable mFont as String
 
-property labelTextSize get mFontSize set setTextFontSize --- some default properties can't be shodowed correctly it seems so I renamed textSize to labelTextSize
-metadata labelTextSize.editor is "com.livecode.pi.number"
-metadata labelTextSize.default     is "12"
-metadata labelTextSize.section is "Text"
+property textSize get mFontSize set setTextFontSize
+metadata textSize.editor is "com.livecode.pi.number"
+metadata textFont.default     is "12"
 private variable mFontSize as Number
 
 property textAlign get mAlign	 set setAlign
@@ -72,6 +70,7 @@ private variable mAlign as String
 --declare variables:
 private variable mPaint as Paint
 private variable mTextPaint as Paint
+
 
 ----constant:
 constant kBuffer is 10
@@ -133,7 +132,6 @@ end handler
 public handler OnPaint()
 	mpDrawBase(my foreground paint,my background paint,mBorder,mRadius)
 	set the paint of this canvas to my foreground paint
-	set the font of this canvas to font mFont at size mFontSize
 	mpWrapTextinRect(rectangle [mBorder*2,mBorder*2,my width-mBorder*2,my height-mBorder*2],mText,mAlign)
 end handler
 
@@ -165,6 +163,7 @@ private handler mpWrapTextinRect(in pTextBox as Rectangle,in pText as String,in 
   split pAlign by " " into tAlign
   replace newline with " qzqz " in pText
   split pText by " " into tWords
+  set the size of text pText on this canvas to mFontSize
   put the height of the layout bounds of text pText on this canvas into tTextH
   put the width of pTextBox into tTextW
   put the floor of ((the height of pTextBox)/tTextH) into tMaxRows
@@ -213,6 +212,10 @@ private handler mpWrapTextinRect(in pTextBox as Rectangle,in pText as String,in 
 		add 1 to tRow
 		add tTextH to the top of pTextBox
 	end repeat
+end handler
+
+public handler OnMouseDown()
+   post "mouseDown"
 end handler
 
 public handler OnMouseUp()
