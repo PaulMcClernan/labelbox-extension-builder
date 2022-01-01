@@ -1,3 +1,12 @@
+
+/**
+Name: mouseUp
+Type: message
+
+Name: mouseDown
+Type: message
+**/
+
 widget org.openxtalk.madpink.labelbox
 
 --required metadata
@@ -23,7 +32,6 @@ metadata someText.default     is "A common mistake that people make when trying 
 metadata someText.section 		is "Basic"
 private variable mText as String
 
-
 --metadata for built-in properties:
 metadata foregroundColor.editor		is "com.livecode.pi.color"
 metadata foregroundColor.default is "255,255,255"
@@ -31,7 +39,7 @@ metadata foregroundColor.section is "Colors"
 metadata foregroundColor.label is "Text Color"
 
 metadata backgroundColor.editor		is "com.livecode.pi.color"
-metadata backgroundColor.default is "255,15,192"
+metadata backgroundColor.default is "140,128,145"
 metadata backgroundColor.section is "Colors"
 metadata backgroundColor.label is "Button Color"
 
@@ -50,14 +58,25 @@ metadata boxRaidus.editor      is "com.livecode.pi.number"
 metadata boxRaidus.default     is "15"
 private variable mRadius as Number
 
-property textFont get mFont set setTextFont
-metadata textFont.editor is "com.livecode.pi.font"
-metadata textFont.default     is "Helvetica"
+-- property textFont get mFont set setTextFont
+-- metadata textFont.editor is "com.livecode.pi.font"
+-- metadata textFont.default     is "Helvetica"
+metadata textFont.user_visible is "false"
+-- private variable mFont as String
+metadata textSize.user_visible is "false"
+
+property labelTextFont get mFont set setTextFont
+metadata labelTextFont.editor is "com.livecode.pi.font"
+metadata labelTextFont.default     is "Helvetica"
+metadata labelTextFont.section is "Text"
+metadata labelTextFont.label is "Label Text Font"
 private variable mFont as String
 
-property textSize get mFontSize set setTextFontSize
-metadata textSize.editor is "com.livecode.pi.number"
-metadata textFont.default     is "12"
+property labelTextSize get mFontSize set setTextFontSize
+metadata labelTextSize.editor is "com.livecode.pi.number"
+metadata labelTextSize.default     is "12"
+metadata labelTextSize.section is "Text"
+metadata labelTextSize.label is "Label Text Size"
 private variable mFontSize as Number
 
 property textAlign get mAlign	 set setAlign
@@ -80,7 +99,9 @@ public handler OnSave(out rProperties as Array)
 	put the empty array into rProperties
 	put mText into rProperties["someText"]
 	put mBorder into rProperties["boxBorder"]
+	put mFontSize into rProperties["textSize"]
 	put mAlign into rProperties["textAlign"]
+	put mFont into rProperties["textFont"]
 end handler
 
 ----NEEDED handler, loads the saved properties
@@ -88,6 +109,8 @@ public handler OnLoad(in pProperties as Array)
 	put pProperties["someText"] into mText
 	put pProperties["boxBorder"] into mBorder
 	put pProperties["textAlign"] into mAlign
+	put pProperties["textSize"] into mFontSize
+	put pProperties["textFont"] into mFont
 end handler
 
 --HANDLERS to set properties
@@ -125,7 +148,16 @@ end handler
 --CREATE AND DRAW WIDGET:
 --OnCreate  This is called when the widget is first created:
 public handler OnCreate()
+	variable tFont as Font
+	variable tFontSize as Number
+	variable tFontName as String
 
+	put my font into tFont
+	put the size of my font into tFontSize
+	put the name of tFont into tFontName
+
+	log [tFontName,tFontSize]
+	-- default font size 12
 end handler
 
 --OnPaint   This is called on redraw
@@ -138,6 +170,7 @@ end handler
 private handler mpDrawBase(in pFore as Paint, in pBack as Paint, in pBorder as Number, in pRadius as Number)
 	variable tRect as Rectangle
 	set the paint of this canvas to pBack
+	set the font of this canvas to font mFont at size mFontSize
 	put rectangle [0,0,my width,my height] into tRect
 	fill rounded rectangle path of tRect with radius pRadius on this canvas
 	set the paint of this canvas to pFore
@@ -163,7 +196,7 @@ private handler mpWrapTextinRect(in pTextBox as Rectangle,in pText as String,in 
   split pAlign by " " into tAlign
   replace newline with " qzqz " in pText
   split pText by " " into tWords
-  set the size of text pText on this canvas to mFontSize
+  set the font of this canvas to font mFont at size mFontSize
   put the height of the layout bounds of text pText on this canvas into tTextH
   put the width of pTextBox into tTextW
   put the floor of ((the height of pTextBox)/tTextH) into tMaxRows
